@@ -2,12 +2,13 @@
 const documentAll = document.querySelectorAll;
 const documentIndi = document.querySelector;
 const gameButtons = document.querySelectorAll(".button");
-const gameTopRow = document.querySelectorAll(".top-row .button");
-const gameMiddleRow = document.querySelectorAll(".middle-row .button");
-const gameBottomRow = document.querySelectorAll(".bottom-row .button");
+// const gameTopRow = document.querySelectorAll(".top-row .button");
+// const gameMiddleRow = document.querySelectorAll(".middle-row .button");
+// const gameBottomRow = document.querySelectorAll(".bottom-row .button");
 const gameSection = document.querySelector(".game");
 const gameOverSection = document.querySelector(".game-over");
 const restartButton = document.querySelector(".restart");
+const gameWinner = document.querySelector(".winner");
 // variables for the game
 let gameConsole = [
     [null,null,null],
@@ -37,16 +38,27 @@ const getComputerOption = () =>{
     return selectedOption;
 }
 //for setting user changes to the front-end and back-end
-const setUserOption = (item) =>{
+const setUserOption = (e) =>{
+    let item = e.target;
     gameState = true;
     item.removeEventListener("click" , setUserOption);
     let userSelection = item.id;
     userSelection = Number(userSelection[userSelection.length - 1]);
     setGameConsole(userSelection,"x");
-    gameController();
+    gameState?getComputerOption(): null;
 }
 //set the gameover changes
-const gameOver = () =>{
+const gameOver = (winner) =>{
+    if (winner == "o"){
+        gameWinner.innerHTML = "lose";
+        gameWinner.style.color = "red";
+    }else if (winner == "tie"){
+        gameWinner.innerHTML = "tie";
+        gameWinner.style.color = "blue";
+    }
+    nonClickedPos.forEach((button) =>{
+        document.querySelector(`#column${button}`).removeEventListener("click",setUserOption);
+    })
     gameSection.style.opacity = .4;
     gameOverSection.style.display = "flex";
     gameConsole = [
@@ -70,7 +82,7 @@ const checkGameOver = (type) =>{
         console.log(gameConsole[i][i] == type && (mainRow || transRow));
         if (gameConsole[i][i] == type && (mainRow || transRow)){
             console.log("called");
-            gameOver();
+            gameOver(type);
             return true;
         }
     }
@@ -79,34 +91,32 @@ const checkGameOver = (type) =>{
     negCrossRow = gameConsole[0][2] == gameConsole[1][1] && gameConsole[1][1]== gameConsole[2][0];
     console.log(gameConsole[1][1] == type && posCrossRow || negCrossRow);
     if (gameConsole[1][1] == type && posCrossRow || negCrossRow){
-        gameOver();
+        gameOver(type);
         return true;
     }
+    if(moves > 8 )gameOver("tie");
 }
 //controll the game movements and game logic
-const gameController = () =>{;
-    if (gameState){
-        getComputerOption();
-    }
+// const gameController = () =>{;
+//     if (gameState){
+//         getComputerOption();
+//     }
 
-}
+// }
 // for the restart functionality
 const resetConsole = () =>{
     gameButtons.forEach((button) =>{
         button.innerHTML = "";
-        // button.addEventListener("click" , () =>{setUserOption(button)});
+        button.addEventListener("click" ,setUserOption);
     })
     gameSection.style.opacity = 1;
     gameOverSection.style.display = "none";
 
 }
-//tommorow start here
-const eventMethod = (e) =>{
-    console.log(e ,e.target.innerHTML);
-}
+
 //adding event listner for each button
 gameButtons.forEach((button) =>{
-    button.addEventListener("click" , eventMethod )
+    button.addEventListener("click" , setUserOption )
 })
 //adding click event for the restart button
 restartButton.addEventListener("click",()=>{resetConsole()})
