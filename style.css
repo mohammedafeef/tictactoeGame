@@ -115,6 +115,18 @@ body{
 .row .button:active{
     background-color:rgba(0,0,0,.2)
 }
+.row .right-corner {
+    border-right:none;
+}
+.row .middle-bottom{
+    border-bottom:none;
+}
+.row .middle-top{
+    border-top:none;
+}
+.row .left-corner{
+    border-left:none;
+}
 /* game-over section */
 .game-over{
     position:absolute;

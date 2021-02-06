@@ -28,7 +28,7 @@ const setGameConsole = (address , type) =>{
     gameConsole[consoleRow][consoleColumn] = type;
     document.querySelector(`#column${address}`).innerHTML = type;
     gameMoves++;
-    checkGameOver(type);
+    checkGameOver(gameConsole,type)==true?gameOver(type):gameMoves > 8 ?gameOver("tie"):null;
 }
 //getting the computer moves
 const getComputerOption = () =>{
@@ -71,30 +71,73 @@ const gameOver = (winner) =>{
     gameState = false;
 }
 //to check wheather is over or not
-const checkGameOver = (type) =>{
+const checkGameOver = (playingConsole,type) =>{
     if (gameMoves < 5)return false;
     console.log(type);
-    console.log(gameConsole , gameMoves)
+    console.log(playingConsole , gameMoves)
     let mainRow = transRow = null;
     for (let i = 0; i < 3; ++i){
-        mainRow = gameConsole[i][0] == gameConsole[i][1] && gameConsole[i][1] == gameConsole[i][2];
-        transRow = gameConsole[0][i] == gameConsole[1][i] && gameConsole[1][i] == gameConsole[2][i];
-        console.log(gameConsole[i][i] == type && (mainRow || transRow));
-        if (gameConsole[i][i] == type && (mainRow || transRow)){
+        mainRow = playingConsole[i][0] == playingConsole[i][1] && playingConsole[i][1] == playingConsole[i][2];
+        transRow = playingConsole[0][i] == playingConsole[1][i] && playingConsole[1][i] == playingConsole[2][i];
+        console.log(playingConsole[i][i] == type && (mainRow || transRow));
+        if (playingConsole[i][i] == type && (mainRow || transRow)){
             console.log("called");
-            gameOver(type);
+            // gameOver(type);
             return true;
         }
     }
     let posCrossRow = negCrossRow = null;
-    posCrossRow = gameConsole[0][0] == gameConsole[1][1] && gameConsole[1][1] == gameConsole[2][2];
-    negCrossRow = gameConsole[0][2] == gameConsole[1][1] && gameConsole[1][1]== gameConsole[2][0];
-    console.log(gameConsole[1][1] == type && posCrossRow || negCrossRow);
-    if (gameConsole[1][1] == type && posCrossRow || negCrossRow){
-        gameOver(type);
+    posCrossRow = playingConsole[0][0] == playingConsole[1][1] && playingConsole[1][1] == playingConsole[2][2];
+    negCrossRow = playingConsole[0][2] == playingConsole[1][1] && playingConsole[1][1]== playingConsole[2][0];
+    console.log(playingConsole[1][1] == type && posCrossRow || negCrossRow);
+    if (playingConsole[1][1] == type && posCrossRow || negCrossRow){
+        // gameOver(type);
         return true;
     }
-    if(moves > 8 )gameOver("tie");
+}
+const minmaxOption = (gameGround,player,emptySpot) =>{
+    if(checkGameOver(gameGround,player) == true){
+        return -20;
+    }else if(checkGameOver(gameGround,"o") == true){
+        return 10;
+    }if(emptySpot.length == 0){
+        return 0;
+    }
+    let moves = [];
+    for (spot in emptySpot){
+        let currentSpot = emptyspot.filter(i => i !=spot);
+        let boardRow = boardCol = move = {};
+        move.index = spot;
+        boardRow = Math.floor(spot / 3);
+        boardCol = spot % 3;
+        gameGround[boardRow][boardCol] = player;
+
+        if (player == "o"){
+            let result = minmaxOption(gameGround,"x",currentSpot);
+            move.score = result;
+        }else{
+            let result = minmaxOption(gameGround,"o",currentSpot);
+            move.score = result;
+        }
+        gameGround[boardRow][boardCol] = null;
+        moves.append(result);
+    }
+    let bestMove = choice = null;
+    if (player == "o"){
+        for (elem in moves){
+            if (elem.score > -1000){
+                bestMove = elem.index;
+            }
+        }
+    }else{
+        for (elem in moves){
+            if (elem.score < 1000){
+                bestMove = elem.index;
+            }
+        }
+    }
+    return bestMove;
+
 }
 //controll the game movements and game logic
 // const gameController = () =>{;
