@@ -17,7 +17,7 @@ let gameConsole = [
 ];
 let gameMoves = 0;
 let nonClickedPos = [0,1,2,3,4,5,6,7,8];
-let gameState = false;
+let gameState = true;
 // funtions for the game 
 //setting the changes in the game console variable
 const setGameConsole = (address , type) =>{
@@ -30,7 +30,7 @@ const setGameConsole = (address , type) =>{
     document.querySelector(`#column${address}`).innerHTML = type;
     document.querySelector(`#column${address}`).removeEventListener("click",setUserOption);
     gameMoves++;
-    checkGameOver(gameConsole,type)==true?gameOver(type):gameMoves > 9 ?gameOver("tie"):null;
+    checkGameOver(gameConsole,type)==true?gameOver(type):gameMoves >= 9 ?gameOver("tie"):null;
 }
 //getting the computer moves
 const getComputerOption = () =>{
@@ -44,17 +44,24 @@ const getComputerOption = () =>{
 //for setting user changes to the front-end and back-end
 const setUserOption = (e) =>{
     let item = e.target;
-    gameState = true;
+    // gameState = true;
     // item.removeEventListener("click" , setUserOption);
     let userSelection = item.id;
     userSelection = Number(userSelection[userSelection.length - 1]);
     setGameConsole(userSelection,"x");
     // gameState == true?getComputerOption(): null;
-    let computerSelection = minmaxOption(gameConsole,"o",nonClickedPos);
-    setGameConsole(computerSelection,"o");
+    if (gameState == true){
+        let tempConsole = [];
+        for (let i =0 ; i < gameConsole.length; ++i){
+            tempConsole[i] = gameConsole[i].slice(0);
+        }
+        let computerSelection = minmaxOption(tempConsole,"o",nonClickedPos);
+        setGameConsole(computerSelection,"o");
+    }
 }
 //set the gameover changes
 const gameOver = (winner) =>{
+    gameState = false;
     if (winner == "o"){
         console.log(gameConsole)
         gameWinner.innerHTML = "lose";
@@ -68,18 +75,18 @@ const gameOver = (winner) =>{
     })
     gameSection.style.opacity = .4;
     gameOverSection.style.display = "flex";
-    gameConsole = [
-        [null,null,null],
-        [null,null,null],
-        [null,null,null]
-    ];
+    // gameConsole = [
+    //     [null,null,null],
+    //     [null,null,null],
+    //     [null,null,null]
+    // ];
     nonClickedPos = [0,1,2,3,4,5,6,7,8];
     gameMoves = 0;
     gameState = false;
 }
 //to check wheather is over or not
 const checkGameOver = (playingConsole,type) =>{
-    if (gameMoves < 5)return false;
+    // if (gameMoves < 5)return false;
     // console.log(type);
     // console.log(playingConsole , gameMoves)
     let mainRow = transRow = null;
@@ -97,22 +104,23 @@ const checkGameOver = (playingConsole,type) =>{
     posCrossRow = playingConsole[0][0] == playingConsole[1][1] && playingConsole[1][1] == playingConsole[2][2];
     negCrossRow = playingConsole[0][2] == playingConsole[1][1] && playingConsole[1][1]== playingConsole[2][0];
     // console.log(playingConsole[1][1] == type && posCrossRow || negCrossRow);
-    if (playingConsole[1][1] == type && posCrossRow == true || negCrossRow == true){
+    if (playingConsole[1][1] == type && (posCrossRow == true || negCrossRow == true)){
+        // console.log("cross")
         // gameOver(type);
         return true;
     }
 }
-const minmaxOption = ([gameGround],player,emptySpot) =>{
-    if(checkGameOver(gameGround,player) == true){
-        return -20;
-    }else if(checkGameOver(gameGround,"o") == true){
+const minmaxOption = (gameGround,player,emptySpot) =>{
+    if(checkGameOver(gameGround,"x") == true){
         return 10;
+    }else if(checkGameOver(gameGround,"o") == true){
+        return 20;
     }if(emptySpot.length == 0){
         return 0;
     }
     let moves = [];
     for (let i = 0 ; i < emptySpot.length; ++i){
-        console.log(gameGround)
+        // console.log(gameGround)
         let boardRow = boardCol = move = currentSpot = {};
         move.index = emptySpot[i];
         currentSpot = emptySpot.filter(item => item != emptySpot[i]);
@@ -164,6 +172,7 @@ const resetConsole = () =>{
     })
     gameSection.style.opacity = 1;
     gameOverSection.style.display = "none";
+    gameState = true;
 
 }
 
