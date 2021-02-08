@@ -1,170 +1,125 @@
 // dom element for the game
-const documentAll = document.querySelectorAll;
-const documentIndi = document.querySelector;
 const gameButtons = document.querySelectorAll(".button");
-// const gameTopRow = document.querySelectorAll(".top-row .button");
-// const gameMiddleRow = document.querySelectorAll(".middle-row .button");
-// const gameBottomRow = document.querySelectorAll(".bottom-row .button");
 const gameSection = document.querySelector(".game");
 const gameOverSection = document.querySelector(".game-over");
 const restartButton = document.querySelector(".restart");
 const gameWinner = document.querySelector(".winner");
 // variables for the game
-let gameConsole = [
-    [null,null,null],
-    [null,null,null],
-    [null,null,null]
+let gameBoard = Array.from(Array(9).keys());
+let winCombs =  [
+	[0, 1, 2],
+	[3, 4, 5],
+	[6, 7, 8],
+	[0, 3, 6],
+	[1, 4, 7],
+	[2, 5, 8],
+	[0, 4, 8],
+	[6, 4, 2]
 ];
 let gameMoves = 0;
-let nonClickedPos = [0,1,2,3,4,5,6,7,8];
 let gameState = true;
 // funtions for the game 
 //setting the changes in the game console variable
 const setGameConsole = (address , type) =>{
-    console.log(address, type)
-    nonClickedPos = nonClickedPos.filter(value => value != address);
-    let consoleRow = Math.floor(address /3);
-    let consoleColumn = address % 3;
-    // console.log(nonClickedPos);
-    gameConsole[consoleRow][consoleColumn] = type;
+    gameBoard[address]= type;
     document.querySelector(`#column${address}`).innerHTML = type;
     document.querySelector(`#column${address}`).removeEventListener("click",setUserOption);
     gameMoves++;
-    checkGameOver(gameConsole,type)==true?gameOver(type):gameMoves >= 9 ?gameOver("tie"):null;
+    checkGameOver(gameBoard,type)?gameOver(type):gameMoves >= 9 ?gameOver("tie"):null;
 }
 //getting the computer moves
 const getComputerOption = () =>{
-    // let selectionAddress = Math.floor(Math.random()*nonClickedPos.length);
-    // let selectedOption = nonClickedPos[selectionAddress];
-    let selectedOption = minmaxOption(gameConsole,"o",nonClickedPos);
-    console.log(selectedOption);
-    setGameConsole(selectedOption,"o");
-    return selectedOption;
+    gameState?setGameConsole(minmaxOption(gameBoard,"o").index,"o"):null;
 }
 //for setting user changes to the front-end and back-end
 const setUserOption = (e) =>{
     let item = e.target;
-    // gameState = true;
-    // item.removeEventListener("click" , setUserOption);
     let userSelection = item.id;
     userSelection = Number(userSelection[userSelection.length - 1]);
     setGameConsole(userSelection,"x");
-    // gameState == true?getComputerOption(): null;
-    if (gameState == true){
-        let tempConsole = [];
-        for (let i =0 ; i < gameConsole.length; ++i){
-            tempConsole[i] = gameConsole[i].slice(0);
-        }
-        let computerSelection = minmaxOption(tempConsole,"o",nonClickedPos);
-        setGameConsole(computerSelection,"o");
-    }
+    getComputerOption()
 }
 //set the gameover changes
 const gameOver = (winner) =>{
     gameState = false;
     if (winner == "o"){
-        console.log(gameConsole)
+        console.log(gameBoard);
         gameWinner.innerHTML = "lose";
         gameWinner.style.color = "red";
     }else if (winner == "tie"){
         gameWinner.innerHTML = "tie";
         gameWinner.style.color = "blue";
     }
-    nonClickedPos.forEach((button) =>{
+    let empty = emptySpot();
+    empty.forEach((button) =>{
         document.querySelector(`#column${button}`).removeEventListener("click",setUserOption);
     })
     gameSection.style.opacity = .4;
     gameOverSection.style.display = "flex";
-    // gameConsole = [
-    //     [null,null,null],
-    //     [null,null,null],
-    //     [null,null,null]
-    // ];
-    nonClickedPos = [0,1,2,3,4,5,6,7,8];
+    gameBoard = Array.from(Array(9).keys());
     gameMoves = 0;
     gameState = false;
 }
 //to check wheather is over or not
-const checkGameOver = (playingConsole,type) =>{
-    // if (gameMoves < 5)return false;
-    // console.log(type);
-    // console.log(playingConsole , gameMoves)
-    let mainRow = transRow = null;
-    for (let i = 0; i < 3; ++i){
-        mainRow = playingConsole[i][0] == playingConsole[i][1] && playingConsole[i][1] == playingConsole[i][2];
-        transRow = playingConsole[0][i] == playingConsole[1][i] && playingConsole[1][i] == playingConsole[2][i];
-        console.log(playingConsole[i][i] == type && (mainRow || transRow));
-        if (playingConsole[i][i] == type && (mainRow || transRow)){
-            // console.log("called");
-            // gameOver(type);
+const checkGameOver = (board,type) => {
+    let plays = board.reduce((a, e, i) =>
+        (e === type) ? a.concat(i) : a, []);
+    for (let [index, win] of winCombs.entries()) {
+        if (win.every(elem => plays.indexOf(elem) > -1)) {
             return true;
         }
     }
-    let posCrossRow = negCrossRow = null;
-    posCrossRow = playingConsole[0][0] == playingConsole[1][1] && playingConsole[1][1] == playingConsole[2][2];
-    negCrossRow = playingConsole[0][2] == playingConsole[1][1] && playingConsole[1][1]== playingConsole[2][0];
-    // console.log(playingConsole[1][1] == type && posCrossRow || negCrossRow);
-    if (playingConsole[1][1] == type && (posCrossRow == true || negCrossRow == true)){
-        // console.log("cross")
-        // gameOver(type);
-        return true;
-    }
+    return false;
 }
-const minmaxOption = (gameGround,player,emptySpot) =>{
-    if(checkGameOver(gameGround,"x") == true){
-        return 10;
-    }else if(checkGameOver(gameGround,"o") == true){
-        return 20;
-    }if(emptySpot.length == 0){
-        return 0;
+//To find the empty spots in gameBoard
+const emptySpot =() =>{
+    return gameBoard.filter(s => typeof s == 'number');
+}
+
+const minmaxOption = (gameGround,player) =>{
+    let liveEmptySpot = emptySpot();
+    if(checkGameOver(gameGround,"x")){
+        return {score : -20};
+    }else if(checkGameOver(gameGround,"o")){
+        return {score : 20};
+    }if(liveEmptySpot.length === 0){
+        return {score : 0};
     }
     let moves = [];
-    for (let i = 0 ; i < emptySpot.length; ++i){
-        // console.log(gameGround)
-        let boardRow = boardCol = move = currentSpot = {};
-        move.index = emptySpot[i];
-        currentSpot = emptySpot.filter(item => item != emptySpot[i]);
-        boardRow = Math.floor(emptySpot[i] / 3);
-        boardCol = emptySpot[i] % 3;
-        gameGround[boardRow][boardCol] = player;
-        // console.log(gameGround,emptySpot[i],boardRow,boardCol);
+    for (let i = 0 ; i < liveEmptySpot.length; ++i){
+        let move = {};
+        move.index = gameGround[liveEmptySpot[i]];
+        gameGround[liveEmptySpot[i]] = player;
         if (player == "o"){
-            let result = minmaxOption(gameGround,"x",currentSpot);
-            move.score = result;
+            let result = minmaxOption(gameGround,"x");
+            move.score = result.score;
         }else{
-            let result = minmaxOption(gameGround,"o",currentSpot);
-            move.score = result;
+            let result = minmaxOption(gameGround,"o");
+            move.score = result.score;
         }
-        gameGround[boardRow][boardCol] = null;
+        gameGround[liveEmptySpot[i]] = move.index;
         moves.push(move);
-        // console.log(moves)
     }
-    // console.log(moves);
-    let bestMove = null;
+    let bestMove ;
     if (player == "o"){
+        let bestScore = -1000;
         for (let i =0 ; i < moves.length ; ++i ){
-            if (moves[i].score > -1000){
-                bestMove = moves[i].index;
+            if (moves[i].score > bestScore){
+                bestScore = moves[i];
+                bestMove = i;
             }
         }
     }else{
+        let bestScore = 1000;
         for (let i =0 ; i < moves.length ; ++i){
-            if (moves[i].score < 1000){
-                bestMove = moves[i].index;
+            if (moves[i].score < bestScore){
+                bestScore = moves[i];
+                bestMove = i;
             }
         }
     }
-    // console.log(moves,nonClickedPos,bestMove);
-    return bestMove;
+    return moves[bestMove];
 }
-//controll the game movements and game logic
-// const gameController = () =>{;
-//     if (gameState){
-//         getComputerOption();
-//     }
-
-// }
-// for the restart functionality
 const resetConsole = () =>{
     gameButtons.forEach((button) =>{
         button.innerHTML = "";
