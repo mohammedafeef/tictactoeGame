@@ -105,7 +105,7 @@ const minmaxOption = (gameGround,player) =>{
         let bestScore = -1000;
         for (let i =0 ; i < moves.length ; ++i ){
             if (moves[i].score > bestScore){
-                bestScore = moves[i];
+                bestScore = moves[i].score;
                 bestMove = i;
             }
         }
@@ -113,7 +113,7 @@ const minmaxOption = (gameGround,player) =>{
         let bestScore = 1000;
         for (let i =0 ; i < moves.length ; ++i){
             if (moves[i].score < bestScore){
-                bestScore = moves[i];
+                bestScore = moves[i].score;
                 bestMove = i;
             }
         }
