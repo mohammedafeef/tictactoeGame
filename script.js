@@ -75,7 +75,23 @@ const checkGameOver = (board,type) => {
 const emptySpot =() =>{
     return gameBoard.filter(s => typeof s == 'number');
 }
+const mediumLevelOption = (gameConsole) =>{
+    let emptySpace = emptySpot()
+    for (let i = 0 ; i <emptySpace.length; ++i){
+        let spotContent = gameConsole[emptySpace[i]];
+        gameConsole[emptySpace[i]] = "O";
+        if (checkGameOver(gameConsole,"o")){
+            return emptySpace[i];
+        }
+        gameConsole[emptySpace[i]] = "x";
+        if (checkGameOver(gameConsole,"x")){
+            return emptySpace[i];
+        }
+        gameConsole[emptySpace[i]] = spotContent;
+    }
+    return emptySpace[0];
 
+}
 const minmaxOption = (gameGround,player) =>{
     let liveEmptySpot = emptySpot();
     if(checkGameOver(gameGround,"x")){
