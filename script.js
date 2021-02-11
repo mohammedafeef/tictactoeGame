@@ -29,10 +29,11 @@ const setGameConsole = (address , type) =>{
 }
 //getting the computer moves
 const getComputerOption = () =>{
-    gameState?setGameConsole(minmaxOption(gameBoard,"o").index,"o"):null;
+    gameState?setGameConsole(getMediumOption(gameBoard),"o"):null;
 }
 //for setting user changes to the front-end and back-end
 const setUserOption = (e) =>{
+    console.log(e);
     let item = e.target;
     let userSelection = item.id;
     userSelection = Number(userSelection[userSelection.length - 1]);
@@ -75,24 +76,43 @@ const checkGameOver = (board,type) => {
 const emptySpot =() =>{
     return gameBoard.filter(s => typeof s == 'number');
 }
-const mediumLevelOption = (gameConsole) =>{
-    let emptySpace = emptySpot()
+//easy level bot
+//medium level bot
+const getMediumOption = (gameConsole) =>{
+    let emptySpace = emptySpot();
+    let spots = [];
     for (let i = 0 ; i <emptySpace.length; ++i){
         let spotContent = gameConsole[emptySpace[i]];
-        gameConsole[emptySpace[i]] = "O";
+        let move = {};
+        move.index = gameConsole[emptySpace[i]];
+        gameConsole[emptySpace[i]] = "o";
         if (checkGameOver(gameConsole,"o")){
-            return emptySpace[i];
+            move.score = 10;
         }
         gameConsole[emptySpace[i]] = "x";
-        if (checkGameOver(gameConsole,"x")){
-            return emptySpace[i];
+        if (!move.score && checkGameOver(gameConsole,"x")){
+            move.score = -10;
         }
         gameConsole[emptySpace[i]] = spotContent;
+        if (!move.score){
+            move.score = -20;
+        }
+        spots.push(move);
     }
-    return emptySpace[0];
+    console.log(spots)
+    let bestScore = bestMove =-30;
+    for (let j = 0; j < spots.length; ++j){
+        if (spots[j].score >bestScore){
+            bestScore = spots[j].score;
+            bestMove = j;
+        }
+    }
+    console.log(spots[bestMove])
+    return spots[bestMove].index;
 
 }
-const minmaxOption = (gameGround,player) =>{
+//unbeatable bot
+const getImpossibleOption = (gameGround,player) =>{
     let liveEmptySpot = emptySpot();
     if(checkGameOver(gameGround,"x")){
         return {score : -20};
