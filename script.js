@@ -4,8 +4,9 @@ const gameSection = document.querySelector(".game");
 const gameOverSection = document.querySelector(".game-over");
 const restartButton = document.querySelector(".restart");
 const gameWinner = document.querySelector(".winner");
+let gameModeButtons = document.querySelectorAll(".neuButton");
+let gameModeSection = document.querySelector(".game-mode");
 // variables for the game
-let gameBoard = Array.from(Array(9).keys());
 let winCombs =  [
 	[0, 1, 2],
 	[3, 4, 5],
@@ -16,12 +17,13 @@ let winCombs =  [
 	[0, 4, 8],
 	[6, 4, 2]
 ];
-let gameMoves = 0;
+let gameMoves = gameMode = gameBoard = 0;
 let gameState = true;
 // funtions for the game 
 //setting the changes in the game console variable
 const setGameConsole = (address , type) =>{
     gameBoard[address]= type;
+    if (type == "o")document.querySelector(`#column${address}`).style.color = "white";
     document.querySelector(`#column${address}`).innerHTML = type;
     document.querySelector(`#column${address}`).removeEventListener("click",setUserOption);
     gameMoves++;
@@ -29,7 +31,25 @@ const setGameConsole = (address , type) =>{
 }
 //getting the computer moves
 const getComputerOption = () =>{
-    gameState?setGameConsole(getMediumOption(gameBoard),"o"):null;
+    let mode = {
+        easy:{
+            fun:getEasyOption
+        },
+        medium:{
+            fun:getMediumOption,
+            gameConsole:gameBoard
+        },
+        hard:{
+            fun:getImpossibleOption,
+            gameConsole:gameBoard,
+            player:"o"
+        }
+    };
+    let optionLevel = mode[gameMode];
+    let option = optionLevel.fun(optionLevel.gameConsole,optionLevel.player);
+    console.log(option)
+    if (gameState)setGameConsole(option.index,"o");
+
 }
 //for setting user changes to the front-end and back-end
 const setUserOption = (e) =>{
@@ -57,9 +77,6 @@ const gameOver = (winner) =>{
     })
     gameSection.style.opacity = .4;
     gameOverSection.style.display = "flex";
-    gameBoard = Array.from(Array(9).keys());
-    gameMoves = 0;
-    gameState = false;
 }
 //to check wheather is over or not
 const checkGameOver = (board,type) => {
@@ -77,6 +94,12 @@ const emptySpot =() =>{
     return gameBoard.filter(s => typeof s == 'number');
 }
 //easy level bot
+const getEasyOption = ()=>{
+    let emptySpace = emptySpot();
+    let option = Math.floor(Math.random()*emptySpace.length-1);
+    return {index:emptySpace[option]}
+
+}
 //medium level bot
 const getMediumOption = (gameConsole) =>{
     let emptySpace = emptySpot();
@@ -108,7 +131,7 @@ const getMediumOption = (gameConsole) =>{
         }
     }
     console.log(spots[bestMove])
-    return spots[bestMove].index;
+    return spots[bestMove];
 
 }
 //unbeatable bot
@@ -157,19 +180,37 @@ const getImpossibleOption = (gameGround,player) =>{
     return moves[bestMove];
 }
 const resetConsole = () =>{
+    gameMoves = 0;
+    gameModeSection.style.display = "flex";
+    gameOverSection.style.display = "none";
+    gameState = true;
+
+}
+//for initializing the game
+const setGame = (e) =>{
+    let eventStyle = e.target.style;
+    eventStyle.transform = "scale(90)";
+    setTimeout(() => {
+        gameModeSection.style.display = "none";
+        eventStyle.transform = "scale(1)";
+    },200);
+    gameMode = e.target.innerHTML;
+    gameBoard = Array.from(Array(9).keys());
     gameButtons.forEach((button) =>{
         button.innerHTML = "";
         button.addEventListener("click" ,setUserOption);
     })
     gameSection.style.opacity = 1;
-    gameOverSection.style.display = "none";
-    gameState = true;
-
 }
-
 //adding event listner for each button
 gameButtons.forEach((button) =>{
     button.addEventListener("click" , setUserOption )
 })
 //adding click event for the restart button
 restartButton.addEventListener("click",()=>{resetConsole()})
+//mode selection button event listener
+gameModeButtons.forEach((button) =>{
+    button.addEventListener("click",setGame);
+})
+
+
