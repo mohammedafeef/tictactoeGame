@@ -150,10 +150,10 @@ const getImpossibleOption = (gameGround,player) =>{
         move.index = gameGround[liveEmptySpot[i]];
         gameGround[liveEmptySpot[i]] = player;
         if (player == "o"){
-            let result = minmaxOption(gameGround,"x");
+            let result = getImpossibleOption(gameGround,"x");
             move.score = result.score;
         }else{
-            let result = minmaxOption(gameGround,"o");
+            let result = getImpossibleOption(gameGround,"o");
             move.score = result.score;
         }
         gameGround[liveEmptySpot[i]] = move.index;
@@ -201,6 +201,15 @@ const setGame = (e) =>{
         button.addEventListener("click" ,setUserOption);
     })
     gameSection.style.opacity = 1;
+}
+const gameStarter =(event) =>{
+    document.querySelector(".startContent").style.letterSpacing = "1.5rem";
+    // document.querySelector(".startContent").style.letterSpacing = "2rem";
+    setTimeout(()=>{
+        gameModeSection.style.display = "flex";
+        event.target.style.display = "none";
+    },300)
+    
 }
 //adding event listner for each button
 gameButtons.forEach((button) =>{

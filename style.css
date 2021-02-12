@@ -53,7 +53,7 @@ body{
                 5px 5px 10px 2px rgba(0,0,0,.1)
 }
 /* to center the inner content */
-.game-console , .row ,.button , .game-over , .game-mode{
+.game-console , .row ,.button , .game-over , .game-mode ,.game-starter{
     display:flex;
     justify-content:center;
     align-items:center;
@@ -72,12 +72,39 @@ body{
     position:relative;
     overflow:hidden;
 }
-.game , .game-over,.game-mode{
+/* for the full width */
+.game , .game-over,.game-mode,.game-starter{
     width:100%;
     height:100%;
 }
+/* game starter section */
+.game-starter{
+    z-index:6;
+    position:absolute;
+    top:0;
+    left:0;
+}
+.game-starter span{
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:4rem;
+    font-weight:bolder;
+    letter-spacing:2rem;
+    transition:letter-spacing .3s;
+    color:#ffffc2;   
+}
+.startContent:hover{
+    background-color:rgba(255,255,255,.1);
+}
+.startContent:active{
+    background-color:rgba(255,255,255,.3);
+}
 /* game mode section */
 .game-mode{
+    display:none;
     position:absolute;
     top:0;
     left:0;
@@ -85,7 +112,6 @@ body{
     backdrop-filter: blur(15px);
     /* background-color: rgba(0,0,0,.3); */
     z-index:4;
-
 }
 .neuButton {
     background-color:transparent;
@@ -138,7 +164,7 @@ body{
 }
 /* game on section */
 .game{
-    opacity:1;
+    opacity:.4;
     transition:opacity .8s ;
     z-index:2;
 }
